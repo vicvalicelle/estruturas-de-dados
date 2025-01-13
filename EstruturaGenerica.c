@@ -16,124 +16,140 @@ typedef struct alunos{
     int anoI;
 }Alunos;
 
-typedef struct pessoa{
+typedef struct pessoa {
     int tipo; // 1- Professor e 2- Aluno
-    void* item;
-}Pessoa;
+    void *item;
+    struct pessoa *next;
+} Pessoa;
 
-void Inicializar(Pessoa *vet, int tam){
-    for (int i = 0; i < tam; i++)
-    {
-        vet[i].tipo = 0;
-        vet[i].item = NULL;
-    }
+void Inicializar(Pessoa **head) {
+    *head = NULL;
 }
 
-void Inserir(Pessoa *vet, int tam, void *info, int tipo){
-    for (int i = 0; i < tam; i++)
-    {
-        if(vet[i].tipo == 0){
-            vet[i].tipo = tipo;
-            vet[i].item = info;
-            return;
+void Inserir(Pessoa **head, void *info, int tipo) {
+    Pessoa *novaPessoa = (Pessoa*)malloc(sizeof(Pessoa));
+    novaPessoa->tipo = tipo;
+    novaPessoa->item = info;
+    novaPessoa->next = *head;
+    *head = novaPessoa;
+}
+
+void Destruir(Pessoa *head) {
+    Pessoa *atual = head;
+    while (atual != NULL) {
+        if (atual->tipo == 1) {
+            Professores *p = (Professores*)atual->item;
+            free(p);
+        } else if (atual->tipo == 2) {
+            Alunos *a = (Alunos*)atual->item;
+            free(a);
         }
+        atual = atual->next;
     }
 }
 
-void RemoverMatricula(Pessoa *vet, int tam, int matricula){
-    for (int i = 0; i < tam; i++)
-    {
-        if(vet[i].tipo == 1){
-            Professores *p = (Professores *)vet[i].item;
-            if(p->matricula == matricula){
-                vet[i].tipo = 0;
-                vet[i].item = NULL;
+void RemoverMatricula(Pessoa **head, int matricula) {
+    Pessoa *atual = *head;
+    Pessoa *anterior = NULL;
+
+    while (atual != NULL) {
+        if (atual->tipo == 1) {
+            Professores *p = (Professores*)atual->item;
+            if (p->matricula == matricula) {
+                if (anterior == NULL) {
+                    *head = atual->next;
+                } else {
+                    anterior->next = atual->next;
+                }
+                free(p);
+                free(atual);
+                return;
+            }
+        } else if (atual->tipo == 2) {
+            Alunos *a = (Alunos*)atual->item;
+            if (a->matricula == matricula) {
+                if (anterior == NULL) {
+                    *head = atual->next;
+                } else {
+                    anterior->next = atual->next;
+                }
+                free(a);
+                free(atual);
                 return;
             }
         }
-        else if(vet[i].tipo == 2){
-            Alunos *a = (Alunos *)vet[i].item;
-            if(a->matricula == matricula){
-                vet[i].tipo = 0;
-                vet[i].item = NULL;
-                return;
-            }
-        }
+        anterior = atual;
+        atual = atual->next;
     }
 }
 
-void BuscaMatricula(Pessoa *vet, int tam, int mat){
-    for (int i = 0; i < tam; i++)
-    {
-        if(vet[i].tipo == 1){
-            Professores *p = (Professores *)vet[i].item;
-            if(p->matricula == mat){
+void BuscaMatricula(Pessoa *head, int mat) {
+    Pessoa *atual = head;
+
+    while (atual != NULL) {
+        if (atual->tipo == 1) {
+            Professores *p = (Professores*)atual->item;
+            if (p->matricula == mat) {
                 printf("Matricula: %d - Nome: %s - Salario: %.2f\n", p->matricula, p->nome, p->salario);
                 return;
             }
-        }
-        else if(vet[i].tipo == 2){
-            Alunos *a = (Alunos *)vet[i].item;
-            if(a->matricula == mat){
+        } else if (atual->tipo == 2) {
+            Alunos *a = (Alunos*)atual->item;
+            if (a->matricula == mat) {
                 printf("Matricula: %d - Nome: %s - Curso: %s - Ano de Ingresso: %d\n", a->matricula, a->nome, a->curso, a->anoI);
                 return;
             }
         }
+        atual = atual->next;
     }
 }
 
-int ContarAlunosPorCurso(Pessoa *vet, int tam, const char *curso) {
+int ContarAlunosPorCurso(Pessoa *head, const char *curso) {
     int contador = 0;
-    for (int i = 0; i < tam; i++) {
-        if (vet[i].tipo == 2) {
-            Alunos *a = (Alunos *)vet[i].item;
+    Pessoa *atual = head;
+
+    while (atual != NULL) {
+        if (atual->tipo == 2) {
+            Alunos *a = (Alunos*)atual->item;
             if (strcmp(a->curso, curso) == 0) {
                 contador++;
             }
         }
+        atual = atual->next;
     }
     return contador;
 }
 
-void ImprimirProfessoresMaiorSalario(Pessoa *vet, int tam) {
+void ImprimirProfessoresMaiorSalario(Pessoa *head) {
     float maiorSalario = 0;
+    Pessoa *atual = head;
 
-    for (int i = 0; i < tam; i++) {
-        if (vet[i].tipo == 1) {
-            Professores *p = (Professores *)vet[i].item;
+    while (atual != NULL) {
+        if (atual->tipo == 1) { // Professor
+            Professores *p = (Professores*)atual->item;
             if (p->salario > maiorSalario) {
                 maiorSalario = p->salario;
             }
         }
+        atual = atual->next;
     }
 
     printf("Professores com salario: %.2f\n", maiorSalario);
-    for (int i = 0; i < tam; i++) {
-        if (vet[i].tipo == 1) {
-            Professores *p = (Professores *)vet[i].item;
+    atual = head;
+    while (atual != NULL) {
+        if (atual->tipo == 1) { // Professor
+            Professores *p = (Professores*)atual->item;
             if (p->salario == maiorSalario) {
                 printf("Matricula: %d - Nome: %s - Salario: %.2f\n", p->matricula, p->nome, p->salario);
             }
         }
+        atual = atual->next;
     }
 }
 
-void Destruir(Pessoa *vet, int tam) {
-    for (int i = 0; i < tam; i++) {
-        if (vet[i].tipo == 1) {
-            Professores *p = (Professores *)vet[i].item;
-            free(p);
-        } else if (vet[i].tipo == 2) {
-            Alunos *a = (Alunos *)vet[i].item;
-            free(a);
-        }
-    }
-}
-
-int main(){
-    Pessoa vet[10];
-    int tam = sizeof(vet) / sizeof(vet[0]);
-    Inicializar(vet, tam);
+int main() {
+    Pessoa *head;
+    Inicializar(&head);
 
     int opcao;
     int matricula;
@@ -159,40 +175,40 @@ int main(){
                     Professores *prof = (Professores*) malloc(sizeof(Professores));
                     printf("Inserir matricula, nome e salario: ");
                     scanf("%d %s %f", &prof->matricula, prof->nome, &prof->salario);
-                    Inserir(vet, tam, prof, 1);
+                    Inserir(&head, prof, 1);
                 } else if (tipo == 2) {
                     Alunos *aluno = (Alunos*) malloc(sizeof(Alunos));
                     printf("Inserir matricula, nome, curso e ano de ingresso: ");
                     scanf("%d %s %s %d", &aluno->matricula, aluno->nome, aluno->curso, &aluno->anoI);
-                    Inserir(vet, tam, aluno, 2);
+                    Inserir(&head, aluno, 2);
                 }
                 break;
             }
             case 2: {
                 printf("Digite a matricula da pessoa a ser removida: ");
                 scanf("%d", &matricula);
-                RemoverMatricula(vet, tam, matricula);
+                RemoverMatricula(&head, matricula);
                 break;
             }
             case 3: {
                 printf("Digite a matricula da pessoa a ser buscada: ");
                 scanf("%d", &matricula);
-                BuscaMatricula(vet, tam, matricula);
+                BuscaMatricula(head, matricula);
                 break;
             }
             case 4: {
                 printf("Digite o nome do curso: ");
                 scanf("%s", curso);
-                int numAlunos = ContarAlunosPorCurso(vet, tam, curso);
+                int numAlunos = ContarAlunosPorCurso(head, curso);
                 printf("Numero de alunos no curso %s: %d\n", curso, numAlunos);
                 break;
             }
             case 5: {
-                ImprimirProfessoresMaiorSalario(vet, tam);
+                ImprimirProfessoresMaiorSalario(head);
                 break;
             }
             case 6: {
-                Destruir(vet, tam);
+                Destruir(head);
                 return 0;
             }
             default:
