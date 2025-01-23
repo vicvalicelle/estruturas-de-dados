@@ -7,7 +7,7 @@ Este repositório contém exemplos e implementações relacionados à disciplina
 O repositório inclui as seguintes implementações:
 
 - **TAD - Fila**: Implementação de uma fila utilizando Tipos Abstratos de Dados (TAD).
-- **TAD - Pilha**: Implementação de uma pilha utilizando TAD.
+- **TADGEN - Grafo**: Implementação de grafo utilizando TAD genérico.
 - **ArvoreABB.c**: Implementação de uma Árvore Binária de Busca (ABB).
 - **ArvoreAVL.c**: Implementação de uma Árvore AVL, uma árvore binária de busca auto-balanceada.
 - **ArvoreBinaria.c**: Implementação de uma árvore binária básica.
